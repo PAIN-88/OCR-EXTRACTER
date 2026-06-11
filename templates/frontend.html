@@ -868,6 +868,7 @@ body { overflow-x: hidden; }
 </div><!-- /warm-main -->
 
 <script>
+const API_BASE = "https://ocr-extracter.onrender.com";
 (function(){
   const c=document.getElementById('warmParticles');
   const cols=['#ff5e6c','#feb300','#ffaaab','#fff5d7'];
@@ -988,7 +989,7 @@ bankSubmit.addEventListener('click',()=>{
   bankSubmit.innerHTML='<span>⏳</span><span>Extracting…</span>';
   const prog=fakeProgress(bankFill,bankPct,bankProg);
   const fd=new FormData(); fd.append('bankStatement',bankFile);
-  const API_BASE = "https://ocr-extracter.onrender.com";
+ 
   fetch(`${API_BASE}/upload-bank`, {
     method: 'POST',
     body: fd
