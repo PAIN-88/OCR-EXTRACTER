@@ -118,7 +118,7 @@ bankSubmit.addEventListener('click',()=>{
   bankSubmit.innerHTML='<span>⏳</span><span>Extracting…</span>';
   const prog=fakeProgress(bankFill,bankPct,bankProg);
   const fd=new FormData(); fd.append('bankStatement',bankFile);
-  fetch('http://127.0.0.1:5000/upload-bank',{method:'POST',body:fd})
+  fetch('/upload-bank',{method:'POST',body:fd})
     .then(r=>r.json())
     .then(data=>{
       prog.finish(); bankJSON=data;
@@ -186,7 +186,7 @@ panSubmit.addEventListener('click',()=>{
   panSubmit.innerHTML='<span>⏳</span><span>Extracting…</span>';
   const prog=fakeProgress(panFill,panPct,panProg);
   const fd=new FormData(); fd.append('panCard',panFile);
-  fetch('http://127.0.0.1:5000/upload-pan',{method:'POST',body:fd})
+  fetch('/upload-pan',{method:'POST',body:fd})
     .then(r=>r.json())
     .then(data=>{
       prog.finish(); panJSON=data;
