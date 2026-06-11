@@ -988,7 +988,7 @@ bankSubmit.addEventListener('click',()=>{
   bankSubmit.innerHTML='<span>⏳</span><span>Extracting…</span>';
   const prog=fakeProgress(bankFill,bankPct,bankProg);
   const fd=new FormData(); fd.append('bankStatement',bankFile);
-  const API_BASE = "https://extracthub-api.onrender.com";
+  const API_BASE = "https://ocr-extracter.onrender.com";
   fetch(`${API_BASE}/upload-bank`, {
     method: 'POST',
     body: fd
