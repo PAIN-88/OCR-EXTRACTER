@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -135,90 +135,90 @@
     
 </body>
 <script src="/static/frontend.js"></script>
-</html> -->
+</html>
 
 
 
+<!-- 
 
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>InsightOCR Extractor — Document Upload</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<!-- ══════════════════════════════════════════════
-     NAVBAR STYLES — WARM PALETTE
-═══════════════════════════════════════════════ -->
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #fff5d7;
-  color: #1a1118;
-  min-height: 100vh;
-}
-header {
-  background: linear-gradient(135deg, #ff5e6c 0%, #feb300 100%);
-  box-shadow: 0 4px 24px rgba(255,94,108,0.28), 0 1px 4px rgba(0,0,0,0.06);
-  padding: 1.25rem 2rem;
-  position: sticky; top: 0; z-index: 200;
-}
-.header-content {
-  max-width: 1200px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: .5rem;
-}
-.logo-section { display:flex; align-items:center; gap:.85rem; }
-.logo-icon {
-  width: 44px; height: 44px;
-  background: rgba(255,255,255,0.22);
-  border: 2px solid rgba(255,255,255,0.4);
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-  backdrop-filter: blur(8px);
-}
-.logo-text {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.65rem; font-weight: 800; letter-spacing: -.01em;
-  color: #fff;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.12);
-}
-.subtitle {
-  font-size: .8rem; font-weight: 500; letter-spacing: .02em;
-  color: rgba(255,255,255,0.82);
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.25);
-  border-radius: 99px;
-  padding: .28rem .9rem;
-  backdrop-filter: blur(8px);
-}
-input[type="file"] { display:none; }
-</style> 
-
-<!-- ══════════════════════════════════════════════
-     PREMIUM WARM REDESIGN STYLES
-═══════════════════════════════════════════════ -->
-<style>
-/* ── TOKENS ──────────────────────────────────────── */
-:root {
-  --beige:    #fff5d7;
-  --coral:    #ff5e6c;
-  --yellow:   #feb300;
-  --pinkleaf: #ffaaab;
-  --cream:    #fffbf0;
-  --warm-bg:  #fef9ee;
-  --card-bg:  rgba(255,255,255,0.72);
-  --border:   rgba(255,94,108,0.12);
-  --text-dark:#1a1118;
-  --text-mid: #5a4a52;
-  --text-soft:#9a8890;
-  --shadow-sm:0 2px 12px rgba(255,94,108,0.08);
-  --shadow-md:0 8px 32px rgba(255,94,108,0.14);
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>InsightOCR Extractor — Document Upload</title>
+            <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+            
+            <!-- ══════════════════════════════════════════════
+                 NAVBAR STYLES — WARM PALETTE
+            ═══════════════════════════════════════════════ -->
+            <style>
+            * { margin:0; padding:0; box-sizing:border-box; }
+            body {
+              font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+              background: #fff5d7;
+              color: #1a1118;
+              min-height: 100vh;
+            }
+            header {
+              background: linear-gradient(135deg, #ff5e6c 0%, #feb300 100%);
+              box-shadow: 0 4px 24px rgba(255,94,108,0.28), 0 1px 4px rgba(0,0,0,0.06);
+              padding: 1.25rem 2rem;
+              position: sticky; top: 0; z-index: 200;
+            }
+            .header-content {
+              max-width: 1200px; margin: 0 auto;
+              display: flex; align-items: center; justify-content: space-between;
+              flex-wrap: wrap; gap: .5rem;
+            }
+            .logo-section { display:flex; align-items:center; gap:.85rem; }
+            .logo-icon {
+              width: 44px; height: 44px;
+              background: rgba(255,255,255,0.22);
+              border: 2px solid rgba(255,255,255,0.4);
+              border-radius: 12px;
+              display: flex; align-items: center; justify-content: center;
+              font-size: 22px;
+              box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+              backdrop-filter: blur(8px);
+            }
+            .logo-text {
+              font-family: 'Playfair Display', Georgia, serif;
+              font-size: 1.65rem; font-weight: 800; letter-spacing: -.01em;
+              color: #fff;
+              text-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            }
+            .subtitle {
+              font-size: .8rem; font-weight: 500; letter-spacing: .02em;
+              color: rgba(255,255,255,0.82);
+              background: rgba(255,255,255,0.15);
+              border: 1px solid rgba(255,255,255,0.25);
+              border-radius: 99px;
+              padding: .28rem .9rem;
+              backdrop-filter: blur(8px);
+            }
+            input[type="file"] { display:none; }
+            </style> 
+            
+            <!-- ══════════════════════════════════════════════
+                 PREMIUM WARM REDESIGN STYLES
+            ═══════════════════════════════════════════════ -->
+            <style>
+            /* ── TOKENS ──────────────────────────────────────── */
+            :root {
+              --beige:    #fff5d7;
+              --coral:    #ff5e6c;
+          --yellow:   #feb300;
+          --pinkleaf: #ffaaab;
+          --cream:    #fffbf0;
+          --warm-bg:  #fef9ee;
+          --card-bg:  rgba(255,255,255,0.72);
+      --border:   rgba(255,94,108,0.12);
+      --text-dark:#1a1118;
+      --text-mid: #5a4a52;
+      --text-soft:#9a8890;
+      --shadow-sm:0 2px 12px rgba(255,94,108,0.08);
+      --shadow-md:0 8px 32px rgba(255,94,108,0.14);
   --shadow-lg:0 20px 60px rgba(255,94,108,0.18);
   --radius:   20px;
   --ease:     cubic-bezier(.4,0,.2,1);
@@ -1088,4 +1088,4 @@ function dlJSON(data,name){
 
 </script>
 </body>
-</html>
+</html> -->
