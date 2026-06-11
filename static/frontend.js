@@ -1,201 +1,217 @@
-// let bankFile = null;
-// let panFile = null;
-// let bankJSON = null;
-// let panJSON = null;
+(function(){
+  const c=document.getElementById('warmParticles');
+  const cols=['#ff5e6c','#feb300','#ffaaab','#fff5d7'];
+  for(let i=0;i<25;i++){
+    const p=document.createElement('div');
+    p.className='wp';
+    const sz=Math.random()*3+1.5;
+    p.style.cssText=`
+      left:${Math.random()*100}%;
+      width:${sz}px; height:${sz}px;
+      animation-duration:${10+Math.random()*15}s;
+      animation-delay:${Math.random()*16}s;
+      background:${cols[Math.floor(Math.random()*cols.length)]};
+    `;
+    c.appendChild(p);
+  }
+})();
 
-// // Tab switching
-// const bankTab = document.getElementById('bankTab');
-// const panTab = document.getElementById('panTab');
-// const bankSection = document.getElementById('bankSection');
-// const panSection = document.getElementById('panSection');
+/* ── SCROLL REVEAL ───────────────────────────── */
+const ro=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
 
-// bankTab.addEventListener('click', () => {
-//     bankTab.classList.add('active-bank');
-//     panTab.classList.remove('active-pan');
-//     bankSection.classList.add('active');
-//     panSection.classList.remove('active');
-// });
+/* ── RIPPLE ──────────────────────────────────── */
+function addRipple(btn){
+  btn.addEventListener('click',function(e){
+    if(this.disabled)return;
+    const r=document.createElement('span');
+    r.className='ripple';
+    const rect=this.getBoundingClientRect();
+    const size=Math.max(rect.width,rect.height);
+    r.style.cssText=`width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+    this.appendChild(r);
+    setTimeout(()=>r.remove(),600);
+  });
+}
 
-// panTab.addEventListener('click', () => {
-//     panTab.classList.add('active-pan');
-//     bankTab.classList.remove('active-bank');
-//     panSection.classList.add('active');
-//     bankSection.classList.remove('active');
-// });
+/* ── FAKE PROGRESS ───────────────────────────── */
+function fakeProgress(fillEl,pctEl,wrapEl){
+  wrapEl.classList.add('show');
+  let v=0;
+  const iv=setInterval(()=>{
+    v+=Math.random()*15+5;
+    if(v>=88){v=88;clearInterval(iv);}
+    fillEl.style.width=v+'%';
+    pctEl.textContent=Math.floor(v)+'%';
+  },130);
+  return {
+    finish(){
+      clearInterval(iv);
+      fillEl.style.width='100%'; pctEl.textContent='100%';
+      setTimeout(()=>{wrapEl.classList.remove('show');fillEl.style.width='0%';},900);
+    }
+  };
+}
 
-// // Bank Statement Upload
-// const bankUploadArea = document.getElementById('bankUploadArea');
-// const bankFileInput = document.getElementById('bankFileInput');
-// const bankFilePreview = document.getElementById('bankFilePreview');
-// const bankFileName = document.getElementById('bankFileName');
-// const bankFileSize = document.getElementById('bankFileSize');
-// const bankClearBtn = document.getElementById('bankClearBtn');
-// const bankSubmitBtn = document.getElementById('bankSubmitBtn');
-// const bankSuccess = document.getElementById('bankSuccess');
-// const downloadBankBtn = document.getElementById('downloadBankBtn');
+/* ── TABS ────────────────────────────────────── */
+const bankTab=document.getElementById('bankTab');
+const panTab=document.getElementById('panTab');
+const bankSection=document.getElementById('bankSection');
+const panSection=document.getElementById('panSection');
 
-// bankUploadArea.addEventListener('click', () => bankFileInput.click());
+bankTab.addEventListener('click',()=>{
+  bankTab.classList.add('tab-active'); bankTab.classList.remove('tab-pan-active');
+  panTab.classList.remove('tab-active','tab-pan-active');
+  bankSection.classList.add('active'); panSection.classList.remove('active');
+});
+panTab.addEventListener('click',()=>{
+  panTab.classList.add('tab-active','tab-pan-active');
+  bankTab.classList.remove('tab-active');
+  panSection.classList.add('active'); bankSection.classList.remove('active');
+});
 
-// bankFileInput.addEventListener('change', (e) => {
-//     const file = e.target.files[0];
-//     if (file && file.type === 'application/pdf') {
-//         bankFile = file;
-//         bankFileName.textContent = file.name;
-//         bankFileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
-//         bankFilePreview.classList.add('show');
-//         bankSubmitBtn.disabled = false;
-//         bankSuccess.classList.remove('show');
-//     } else {
-//         alert('Please upload a PDF file');
-//         bankFileInput.value = '';
-//     }
-// });
+/* ── BANK ────────────────────────────────────── */
+let bankFile=null,bankJSON=null;
+const bankZone=document.getElementById('bankZone');
+const bankInput=document.getElementById('bankFileInput');
+const bankFC=document.getElementById('bankFC');
+const bankFName=document.getElementById('bankFName');
+const bankFSize=document.getElementById('bankFSize');
+const bankClear=document.getElementById('bankClear');
+const bankSubmit=document.getElementById('bankSubmit');
+const bankToast=document.getElementById('bankToast');
+const bankDL=document.getElementById('bankDL');
+const bankProg=document.getElementById('bankProg');
+const bankFill=document.getElementById('bankFill');
+const bankPct=document.getElementById('bankPct');
+addRipple(bankSubmit);
 
-// bankClearBtn.addEventListener('click', () => {
-//     bankFile = null;
-//     bankFileInput.value = '';
-//     bankFilePreview.classList.remove('show');
-//     bankSubmitBtn.disabled = true;
-//     bankSuccess.classList.remove('show');
-// });
+bankZone.addEventListener('click',()=>bankInput.click());
+bankZone.addEventListener('dragover',e=>{e.preventDefault();bankZone.classList.add('dragover')});
+bankZone.addEventListener('dragleave',()=>bankZone.classList.remove('dragover'));
+bankZone.addEventListener('drop',e=>{
+  e.preventDefault();bankZone.classList.remove('dragover');
+  const f=e.dataTransfer.files[0]; if(f)handleBank(f);
+});
+bankInput.addEventListener('change',e=>{if(e.target.files[0])handleBank(e.target.files[0])});
+function handleBank(f){
+  if(f.type!=='application/pdf'){alert('Please upload a PDF file');return;}
+  if(f.size>10*1024*1024){alert('File exceeds 10 MB');return;}
+  bankFile=f;
+  bankFName.textContent=f.name;
+  bankFSize.textContent=(f.size/1024/1024).toFixed(2)+' MB · Ready';
+  bankFC.classList.add('show');
+  bankSubmit.disabled=false;
+  bankToast.classList.remove('show');
+  bankDL.style.display='none';
+}
+bankClear.addEventListener('click',()=>{
+  bankFile=null; bankInput.value='';
+  bankFC.classList.remove('show');
+  bankSubmit.disabled=true; bankToast.classList.remove('show');
+});
+bankSubmit.addEventListener('click',()=>{
+  if(!bankFile)return;
+  bankSubmit.disabled=true;
+  bankSubmit.innerHTML='<span>⏳</span><span>Extracting…</span>';
+  const prog=fakeProgress(bankFill,bankPct,bankProg);
+  const fd=new FormData(); fd.append('bankStatement',bankFile);
+  fetch('http://127.0.0.1:5000/upload-bank',{method:'POST',body:fd})
+    .then(r=>r.json())
+    .then(data=>{
+      prog.finish(); bankJSON=data;
+      bankToast.classList.add('show'); bankDL.style.display='flex';
+      bankSubmit.innerHTML='<span>✓</span><span>Extracted Successfully</span>';
+      setTimeout(()=>{
+        bankFile=null; bankInput.value='';
+        bankFC.classList.remove('show'); bankToast.classList.remove('show');
+        bankSubmit.disabled=true;
+        bankSubmit.innerHTML='<span>🚀</span><span>Extract Bank Data</span>';
+      },3500);
+    })
+    .catch(()=>{
+      prog.finish();
+      alert('Upload failed — please try again.');
+      bankSubmit.disabled=false;
+      bankSubmit.innerHTML='<span>🚀</span><span>Extract Bank Data</span>';
+    });
+});
+bankDL.addEventListener('click',()=>dlJSON(bankJSON,'bank_statement.json'));
 
-// // SUBMIT BANK FILE
-// bankSubmitBtn.addEventListener('click', () => {
-//     if (bankFile) {
-//         const formData = new FormData();
-//         formData.append('bankStatement', bankFile);
+/* ── PAN ─────────────────────────────────────── */
+let panFile=null,panJSON=null;
+const panZone=document.getElementById('panZone');
+const panInput=document.getElementById('panFileInput');
+const panFC=document.getElementById('panFC');
+const panFName=document.getElementById('panFName');
+const panFSize=document.getElementById('panFSize');
+const panClear=document.getElementById('panClear');
+const panSubmit=document.getElementById('panSubmit');
+const panToast=document.getElementById('panToast');
+const panDL=document.getElementById('panDL');
+const panProg=document.getElementById('panProg');
+const panFill=document.getElementById('panFill');
+const panPct=document.getElementById('panPct');
+addRipple(panSubmit);
 
-//         fetch('http://127.0.0.1:5000/upload-bank', {
-//             method: 'POST',
-//             body: formData
-//         })
-//         .then(res => res.json())
-//         .then(data => {
+panZone.addEventListener('click',()=>panInput.click());
+panZone.addEventListener('dragover',e=>{e.preventDefault();panZone.classList.add('dragover')});
+panZone.addEventListener('dragleave',()=>panZone.classList.remove('dragover'));
+panZone.addEventListener('drop',e=>{
+  e.preventDefault();panZone.classList.remove('dragover');
+  const f=e.dataTransfer.files[0]; if(f)handlePan(f);
+});
+panInput.addEventListener('change',e=>{if(e.target.files[0])handlePan(e.target.files[0])});
+function handlePan(f){
+  if(f.type!=='application/pdf'&&!f.type.startsWith('image/')){alert('Please upload a PDF or image');return;}
+  if(f.size>10*1024*1024){alert('File exceeds 10 MB');return;}
+  panFile=f;
+  panFName.textContent=f.name;
+  panFSize.textContent=(f.size/1024/1024).toFixed(2)+' MB · Ready';
+  panFC.classList.add('show');
+  panSubmit.disabled=false;
+  panToast.classList.remove('show');
+  panDL.style.display='none';
+}
+panClear.addEventListener('click',()=>{
+  panFile=null; panInput.value='';
+  panFC.classList.remove('show');
+  panSubmit.disabled=true; panToast.classList.remove('show');
+});
+panSubmit.addEventListener('click',()=>{
+  if(!panFile)return;
+  panSubmit.disabled=true;
+  panSubmit.innerHTML='<span>⏳</span><span>Extracting…</span>';
+  const prog=fakeProgress(panFill,panPct,panProg);
+  const fd=new FormData(); fd.append('panCard',panFile);
+  fetch('http://127.0.0.1:5000/upload-pan',{method:'POST',body:fd})
+    .then(r=>r.json())
+    .then(data=>{
+      prog.finish(); panJSON=data;
+      panToast.classList.add('show'); panDL.style.display='flex';
+      panSubmit.innerHTML='<span>✓</span><span>Extracted Successfully</span>';
+      setTimeout(()=>{
+        panFile=null; panInput.value='';
+        panFC.classList.remove('show'); panToast.classList.remove('show');
+        panSubmit.disabled=true;
+        panSubmit.innerHTML='<span>🚀</span><span>Extract PAN Data</span>';
+      },3500);
+    })
+    .catch(()=>{
+      prog.finish();
+      alert('Upload failed — please try again.');
+      panSubmit.disabled=false;
+      panSubmit.innerHTML='<span>🚀</span><span>Extract PAN Data</span>';
+    });
+});
+panDL.addEventListener('click',()=>dlJSON(panJSON,'pan_card.json'));
 
-//             console.log('Backend response:', data);
-
-//             // STORE JSON FOR DOWNLOAD
-//             bankJSON = data;
-
-//             // Enable download button
-//             downloadBankBtn.style.display = "block";
-
-//             // UI changes
-//             bankSuccess.classList.add('show');
-//             bankSubmitBtn.textContent = 'Uploaded Successfully';
-
-//             setTimeout(() => {
-//                 bankFile = null;
-//                 bankFileInput.value = '';
-//                 bankFilePreview.classList.remove('show');
-//                 bankSuccess.classList.remove('show');
-//                 bankSubmitBtn.disabled = true;
-//                 bankSubmitBtn.textContent = 'Submit Bank Statement';
-//             }, 2000);
-//         })
-//         .catch(err => {
-//             console.error('Upload failed', err);
-//             alert('Upload failed! Try again.');
-//         });
-//     }
-// });
-
-// // DOWNLOAD BANK JSON
-// downloadBankBtn.addEventListener("click", () => {
-//     downloadJSON(bankJSON, "bank_statement.json");
-// });
-
-// // PAN Upload
-// const panUploadArea = document.getElementById('panUploadArea');
-// const panFileInput = document.getElementById('panFileInput');
-// const panFilePreview = document.getElementById('panFilePreview');
-// const panFileName = document.getElementById('panFileName');
-// const panFileSize = document.getElementById('panFileSize');
-// const panClearBtn = document.getElementById('panClearBtn');
-// const panSubmitBtn = document.getElementById('panSubmitBtn');
-// const panSuccess = document.getElementById('panSuccess');
-// const downloadPanBtn = document.getElementById('downloadPanBtn');
-
-// panUploadArea.addEventListener('click', () => panFileInput.click());
-
-// panFileInput.addEventListener('change', (e) => {
-//     const file = e.target.files[0];
-//     if (file && (file.type === 'application/pdf' || file.type.startsWith('image/'))) {
-//         panFile = file;
-//         panFileName.textContent = file.name;
-//         panFileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
-//         panFilePreview.classList.add('show');
-//         panSubmitBtn.disabled = false;
-//         panSuccess.classList.remove('show');
-//     } else {
-//         alert('Please upload a PDF or Image');
-//         panFileInput.value = '';
-//     }
-// });
-
-// panClearBtn.addEventListener('click', () => {
-//     panFile = null;
-//     panFileInput.value = '';
-//     panFilePreview.classList.remove('show');
-//     panSubmitBtn.disabled = true;
-//     panSuccess.classList.remove('show');
-// });
-
-// // SUBMIT PAN FILE
-// panSubmitBtn.addEventListener('click', () => {
-//     if (panFile) {
-//         const formData = new FormData();
-//         formData.append('panCard', panFile);
-
-//         fetch('http://127.0.0.1:5000/upload-pan', {
-//             method: 'POST',
-//             body: formData
-//         })
-//         .then(res => res.json())
-//         .then(data => {
-
-//             console.log('Backend response:', data);
-
-//             // STORE JSON FOR DOWNLOAD
-//             panJSON = data;
-
-//             // Show button
-//             downloadPanBtn.style.display = "block";
-
-//             panSuccess.classList.add('show');
-//             panSubmitBtn.textContent = 'Uploaded Successfully';
-
-//             setTimeout(() => {
-//                 panFile = null;
-//                 panFileInput.value = '';
-//                 panFilePreview.classList.remove('show');
-//                 panSuccess.classList.remove('show');
-//                 panSubmitBtn.disabled = true;
-//                 panSubmitBtn.textContent = 'Submit PAN Card';
-//             }, 2000);
-//         })
-//         .catch(err => {
-//             console.error('Upload failed', err);
-//             alert('Upload failed! Try again.');
-//         });
-//     }
-// });
-
-// // DOWNLOAD PAN JSON
-// downloadPanBtn.addEventListener("click", () => {
-//     downloadJSON(panJSON, "pan_card.json");
-// });
-
-// // Download JSON Utility
-// function downloadJSON(jsonData, filename) {
-//     const jsonStr = JSON.stringify(jsonData, null, 4);
-//     const blob = new Blob([jsonStr], { type: "application/json" });
-//     const url = URL.createObjectURL(blob);
-
-//     const a = document.createElement("a");
-//     a.href = url;
-//     a.download = filename;
-//     a.click();
-
-//     URL.revokeObjectURL(url);
-// }
+/* ── DOWNLOAD UTIL ───────────────────────────── */
+function dlJSON(data,name){
+  const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a'); a.href=u; a.download=name; a.click();
+  URL.revokeObjectURL(u);
+}
