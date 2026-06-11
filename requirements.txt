@@ -2,6 +2,6 @@ Flask
 flask-cors
 pdfplumber
 Pillow
-easyocr
+pytesseract
 regex
 gunicorn
