@@ -1,15 +1,45 @@
 from flask import Flask, request, jsonify, render_template
 import pdfplumber
 from PIL import Image
-import easyocr
+import pytesseract
 import re
 from flask_cors import CORS
 import os
+import platform
 
 app = Flask(__name__)
 CORS(app)
 
-reader = easyocr.Reader(['en'], gpu=False)
+def setup_tesseract():
+    if os.getenv('TESSERACT_PATH'):
+        pytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_PATH')
+        return
+    
+    system = platform.system()
+    common_paths = []
+    
+    if system == "Windows":
+        common_paths = [
+            r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+            r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+        ]
+    elif system == "Darwin":  
+        common_paths = [
+            "/usr/local/bin/tesseract",
+            "/opt/homebrew/bin/tesseract",
+        ]
+    else: 
+        common_paths = [
+            "/usr/bin/tesseract",
+            "/usr/local/bin/tesseract",
+        ]
+    
+    for path in common_paths:
+        if os.path.exists(path):
+            pytesseract.pytesseract.tesseract_cmd = path
+            return
+
+setup_tesseract()
 
 pattern = r"(\b(?:\d{1,2}[-/.]\d{1,2}|\d{1,2}\s+(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?))\b)\s+(.+?)\s+(?:(\d{1,3}(?:,\d{3})*\.\d{2})\s+)?(?:(\d{1,3}(?:,\d{3})*\.\d{2})\s+)?(\d{1,3}(?:,\d{3})*\.\d{2})"
 
@@ -28,11 +58,11 @@ def upload_bank():
             for page in pdf.pages:
                 page_img = page.to_image(resolution=300)
                 pil_img = page_img.original
-                result = reader.readtext(pil_img, detail=0)
-                text = ' '.join(result)
+                text = pytesseract.image_to_string(pil_img)
                 clean = re.sub(r"\s+", " ", text)
                 matches = re.findall(pattern, clean)
                 for date, desc, debit, credit, balance in matches:
+                    amount = debit if debit else credit
                     output["transactions"].append({
                         "date": date,
                         "description": desc.strip(),
@@ -58,13 +88,10 @@ def upload_pan():
                 page = pdf.pages[0]
                 page_image = page.to_image(resolution=300)
                 pil_img = page_image.original
-                result = reader.readtext(pil_img, detail=0)
-                text = ' '.join(result)
+                text = pytesseract.image_to_string(pil_img)
         else:
             img = Image.open(file.stream)
-            import numpy as np
-            result = reader.readtext(np.array(img), detail=0)
-            text = ' '.join(result)
+            text = pytesseract.image_to_string(img)
 
         pan_match = re.search(pan_pattern, text)
         name_match = re.search(name_pattern, text, re.MULTILINE)
